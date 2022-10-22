@@ -3,11 +3,11 @@ package main
 import (
 	"flag"
 	"log"
+	"read_advisor_bot/internal/api/telegram"
 )
 
 func main() {
-	token := mustToken()
-
+	tgClient := telegram.New("api.telegram.org", mustToken())
 	//processor = processor.New()
 
 	//consumer.Start(fetcher, processor)
