@@ -3,7 +3,7 @@ package main
 import (
 	"flag"
 	"log"
-	"read_advisor_bot/internal/api/telegram"
+	"read_advisor_bot/internal/api/client/telegram"
 )
 
 func main() {
