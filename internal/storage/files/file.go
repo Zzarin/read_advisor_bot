@@ -18,7 +18,7 @@ type Storage struct {
 
 const defaultPerm = 0774
 
-func New(basePath string) Storage {
+func NewStorage(basePath string) Storage {
 	return Storage{basePath: basePath}
 }
 
@@ -26,7 +26,7 @@ func fileName(page *storage.Page) (string, error) {
 	return page.Hash()
 }
 
-func (s *Storage) Save(page *storage.Page) (err error) {
+func (s Storage) Save(page *storage.Page) (err error) {
 	filePath := filepath.Join(s.basePath, page.UserName) // путь до директории куда сохранить файл
 	err = os.Mkdir(filePath, defaultPerm)                //создаем директорию с правами доступа
 	if err != nil {
@@ -49,7 +49,7 @@ func (s *Storage) Save(page *storage.Page) (err error) {
 		if err == nil {
 			err = errClose
 		} else if errClose != nil {
-			log.Printf("can't close file %w", err)
+			log.Printf("can't close file %s", err.Error())
 		}
 	}(file.Close)
 
@@ -60,7 +60,7 @@ func (s *Storage) Save(page *storage.Page) (err error) {
 	return nil
 }
 
-func (s *Storage) PickRandom(userName string) (page *storage.Page, err error) {
+func (s Storage) PickRandom(userName string) (page *storage.Page, err error) {
 	filePath := filepath.Join(s.basePath, userName)
 	files, err := os.ReadDir(filePath)
 	if err != nil {
@@ -78,7 +78,7 @@ func (s *Storage) PickRandom(userName string) (page *storage.Page, err error) {
 	return s.decodePage(filepath.Join(filePath, file.Name())) //декодируем рандомный файл
 }
 
-func (s *Storage) decodePage(filePath string) (page *storage.Page, err error) {
+func (s Storage) decodePage(filePath string) (page *storage.Page, err error) {
 	file, err := os.Open(filePath)
 	if err != nil {
 		return nil, fmt.Errorf("can't open file %w", err)
@@ -88,7 +88,7 @@ func (s *Storage) decodePage(filePath string) (page *storage.Page, err error) {
 		if err == nil {
 			err = errClose
 		} else if errClose != nil {
-			log.Printf("can't close file %w", err)
+			log.Printf("can't close file %s", err.Error())
 		}
 	}(file.Close)
 
@@ -99,31 +99,31 @@ func (s *Storage) decodePage(filePath string) (page *storage.Page, err error) {
 	return page, nil
 }
 
-func (s *Storage) Remove(page *storage.Page) error {
+func (s Storage) Remove(page *storage.Page) error {
 	fileName, err := fileName(page)
 	if err != nil {
 		return fmt.Errorf("can't get file name %w", err)
 	}
-	filepath := filepath.Join(s.basePath, page.UserName, fileName)
-	err = os.Remove(filepath)
+	pathToFile := filepath.Join(s.basePath, page.UserName, fileName)
+	err = os.Remove(pathToFile)
 	if err != nil {
-		fileName := fmt.Sprintf("can't remove file %s", filepath)
+		fileName := fmt.Sprintf("can't remove file %s", pathToFile)
 		return fmt.Errorf(fileName, err)
 	}
 	return nil
 }
 
-func (s *Storage) IsExist(page *storage.Page) (bool, error) {
+func (s Storage) IsExist(page *storage.Page) (bool, error) {
 	fileName, err := fileName(page)
 	if err != nil {
 		return false, fmt.Errorf("can't check if file exists %w", err)
 	}
-	filepath := filepath.Join(s.basePath, page.UserName, fileName)
-	switch _, err = os.Stat(filepath); {
+	pathToFile := filepath.Join(s.basePath, page.UserName, fileName)
+	switch _, err = os.Stat(pathToFile); {
 	case errors.Is(err, os.ErrNotExist):
 		return false, nil
 	case err != nil:
-		fileName := fmt.Sprintf("can't check if file %s exists", filepath)
+		fileName := fmt.Sprintf("can't check if file %s exists", pathToFile)
 		return false, fmt.Errorf(fileName, err)
 	}
 

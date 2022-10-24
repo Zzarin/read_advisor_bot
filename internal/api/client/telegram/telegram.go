@@ -86,7 +86,7 @@ func (c *Client) doRequest(method string, query url.Values) (bytes []byte, err e
 		if err == nil {
 			err = errClose
 		} else if errClose != nil {
-			log.Printf("can't close request body %w", err)
+			log.Printf("can't close request body %s", err.Error())
 		}
 	}(res.Body.Close)
 

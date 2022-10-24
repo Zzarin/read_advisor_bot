@@ -19,7 +19,7 @@ type Meta struct {
 	UserName string
 }
 
-func New(client *telegram2.Client, storage storage.Storage) *Processor {
+func NewProcessor(client *telegram2.Client, storage storage.Storage) *Processor {
 	return &Processor{
 		tg:      client,
 		offset:  0,

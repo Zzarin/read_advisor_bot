@@ -4,13 +4,21 @@ import (
 	"flag"
 	"log"
 	"read_advisor_bot/internal/api/client/telegram"
+	"read_advisor_bot/internal/consumer/event_consumer"
+	eventTelegram "read_advisor_bot/internal/events/telegram"
+	"read_advisor_bot/internal/storage/files"
 )
 
 func main() {
 	tgClient := telegram.New("api.telegram.org", mustToken())
-	//processor = processor.New()
-
-	//consumer.Start(fetcher, processor)
+	storage := files.NewStorage("storage")
+	eventsProcessor := eventTelegram.NewProcessor(tgClient, storage)
+	log.Print("service started")
+	consumer := event_consumer.NewConsumer(eventsProcessor, eventsProcessor, 100)
+	err := consumer.Start()
+	if err != nil {
+		log.Fatal("service is stopped", err)
+	}
 }
 
 func mustToken() string {
