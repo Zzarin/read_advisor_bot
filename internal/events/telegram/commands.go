@@ -62,10 +62,10 @@ func (p Processor) savePage(chatID int, pageURL string, userName string) (err er
 
 func (p *Processor) sendRandom(chatID int, userName string) (err error) {
 	page, err := p.storage.PickRandom(userName)
-	if err != nil && !errors.Is(err, errors.New("no saved pages")) {
+	if err != nil && !errors.Is(err, storage.ErrNoSavedPages) {
 		return fmt.Errorf("can't pick a random page %w", err)
 	}
-	if errors.Is(err, errors.New("no saved pages")) {
+	if errors.Is(err, storage.ErrNoSavedPages) {
 		return p.tg.SendMessage(chatID, msgNoSavedPages)
 	}
 

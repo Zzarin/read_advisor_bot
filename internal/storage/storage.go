@@ -2,16 +2,19 @@ package storage
 
 import (
 	"crypto/sha1"
+	"errors"
 	"fmt"
 	"io"
 )
 
 type Storage interface {
-	Save(page *Page) error
-	PickRandom(userName string) (*Page, error)
-	Remove(p *Page) error
-	IsExist(p *Page) (bool, error)
+	Save(page *Page) (err error)
+	PickRandom(userName string) (page *Page, err error)
+	Remove(page *Page) error
+	IsExist(page *Page) (bool, error)
 }
+
+var ErrNoSavedPages = errors.New("no saved pages")
 
 type Page struct {
 	URL      string

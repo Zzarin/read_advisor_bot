@@ -29,7 +29,7 @@ func fileName(page *storage.Page) (string, error) {
 func (s Storage) Save(page *storage.Page) (err error) {
 	filePath := filepath.Join(s.basePath, page.UserName) // путь до директории куда сохранить файл
 	err = os.Mkdir(filePath, defaultPerm)                //создаем директорию с правами доступа
-	if err != nil {
+	if err != nil && !os.IsExist(err) {
 		return fmt.Errorf("can't create new directory to save %w", err)
 	}
 
@@ -62,13 +62,16 @@ func (s Storage) Save(page *storage.Page) (err error) {
 
 func (s Storage) PickRandom(userName string) (page *storage.Page, err error) {
 	filePath := filepath.Join(s.basePath, userName)
+	//check all folders inside storage. if no folder with our user then finish
+	//check user folder
+	//create folder and then check files inside
 	files, err := os.ReadDir(filePath)
 	if err != nil {
 		return nil, fmt.Errorf("can't read directory %w", err)
 	}
 
 	if len(files) == 0 {
-		return nil, errors.New("no saved pages")
+		return nil, storage.ErrNoSavedPages
 	}
 
 	rand.Seed(time.Now().Unix()) //чтобы генератор псевдослучайных чисел всегд возвращал разные числа

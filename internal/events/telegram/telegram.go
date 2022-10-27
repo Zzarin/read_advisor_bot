@@ -92,7 +92,6 @@ func event(update telegram2.Update) events.Event {
 			UserName: update.Message.From.Username,
 		}
 	}
-
 	return resp
 }
 
