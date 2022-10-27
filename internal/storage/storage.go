@@ -1,6 +1,7 @@
 package storage
 
 import (
+	"context"
 	"crypto/sha1"
 	"errors"
 	"fmt"
@@ -8,10 +9,10 @@ import (
 )
 
 type Storage interface {
-	Save(page *Page) (err error)
-	PickRandom(userName string) (page *Page, err error)
-	Remove(page *Page) error
-	IsExist(page *Page) (bool, error)
+	Save(ctx context.Context, page *Page) (err error)
+	PickRandom(ctx context.Context, userName string) (page *Page, err error)
+	Remove(ctx context.Context, page *Page) error
+	IsExist(ctx context.Context, page *Page) (bool, error)
 }
 
 var ErrNoSavedPages = errors.New("no saved pages")
