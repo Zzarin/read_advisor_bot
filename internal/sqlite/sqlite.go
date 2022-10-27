@@ -11,6 +11,15 @@ type Storage struct {
 	db *sql.DB
 }
 
+func (s *Storage) init(ctx context.Context) error {
+	query := `CREATE TABLE IF NOT EXISTS pages (url TEXT, user_name TEXT)`
+	_, err := s.db.ExecContext(ctx, query)
+	if err != nil {
+		return fmt.Errorf("can't create a database table %w", err)
+	}
+	return nil
+}
+
 //NewDb creates new SQLite storage.
 func NewDb(path string) (*Storage, error) { //path is a path where Db is gonna be stored
 	db, err := sql.Open("sqlite3", path)
