@@ -3,13 +3,13 @@ package telegram
 import (
 	"errors"
 	"fmt"
-	telegram2 "read_advisor_bot/internal/api/client/telegram"
+	tgClient "read_advisor_bot/internal/api/client/telegram"
 	"read_advisor_bot/internal/events"
 	"read_advisor_bot/internal/storage"
 )
 
 type Processor struct {
-	tg      *telegram2.Client
+	tg      *tgClient.Client
 	offset  int
 	storage storage.Storage
 }
@@ -19,7 +19,7 @@ type Meta struct {
 	UserName string
 }
 
-func NewProcessor(client *telegram2.Client, storage storage.Storage) *Processor {
+func NewProcessor(client *tgClient.Client, storage storage.Storage) *Processor {
 	return &Processor{
 		tg:      client,
 		offset:  0,
@@ -80,7 +80,7 @@ func meta(event events.Event) (Meta, error) {
 	return res, nil
 }
 
-func event(update telegram2.Update) events.Event {
+func event(update tgClient.Update) events.Event {
 	updateType := fetchType(update)
 	resp := events.Event{
 		Type: updateType,
@@ -95,14 +95,14 @@ func event(update telegram2.Update) events.Event {
 	return resp
 }
 
-func fetchText(update telegram2.Update) string {
+func fetchText(update tgClient.Update) string {
 	if update.Message == nil {
 		return ""
 	}
 	return update.Message.Text
 }
 
-func fetchType(update telegram2.Update) events.Type {
+func fetchType(update tgClient.Update) events.Type {
 	if update.Message == nil {
 		return events.Unknown
 	}
