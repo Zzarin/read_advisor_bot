@@ -1,11 +1,12 @@
 package telegram
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"log"
 	"net/url"
-	"read_advisor_bot/internal/storage"
+	"read_advisor_bot/internal/sqlite"
 	"strings"
 )
 
@@ -36,11 +37,11 @@ func (p *Processor) doCmd(text string, chatID int, userName string) error {
 }
 
 func (p Processor) savePage(chatID int, pageURL string, userName string) (err error) {
-	page := &storage.Page{
+	page := &sqlite.Page{
 		URL:      pageURL,
 		UserName: userName,
 	}
-	isExist, err := p.storage.IsExist(page)
+	isExist, err := p.storage.IsExist(context.TODO(), page)
 	if err != nil {
 		return fmt.Errorf("can't check if page exist %w", err)
 	}
@@ -48,7 +49,7 @@ func (p Processor) savePage(chatID int, pageURL string, userName string) (err er
 		return p.tg.SendMessage(chatID, msgAlreadyExists)
 	}
 
-	err = p.storage.Save(page)
+	err = p.storage.Save(context.TODO(), page)
 	if err != nil {
 		return fmt.Errorf("can't save new page %w", err)
 	}
@@ -61,11 +62,11 @@ func (p Processor) savePage(chatID int, pageURL string, userName string) (err er
 }
 
 func (p *Processor) sendRandom(chatID int, userName string) (err error) {
-	page, err := p.storage.PickRandom(userName)
-	if err != nil && !errors.Is(err, storage.ErrNoSavedPages) {
+	page, err := p.storage.PickRandom(context.TODO(), userName)
+	if err != nil && !errors.Is(err, sqlite.ErrNoSavedPages) {
 		return fmt.Errorf("can't pick a random page %w", err)
 	}
-	if errors.Is(err, storage.ErrNoSavedPages) {
+	if errors.Is(err, sqlite.ErrNoSavedPages) {
 		return p.tg.SendMessage(chatID, msgNoSavedPages)
 	}
 
@@ -74,7 +75,7 @@ func (p *Processor) sendRandom(chatID int, userName string) (err error) {
 		return fmt.Errorf("can't send page link %w", err)
 	}
 
-	return p.storage.Remove(page)
+	return p.storage.Remove(context.TODO(), page)
 }
 
 func (p *Processor) sendHelp(chatID int) error {

@@ -1,17 +1,18 @@
 package telegram
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	tgClient "read_advisor_bot/internal/api/client/telegram"
 	"read_advisor_bot/internal/events"
-	"read_advisor_bot/internal/storage"
+	"read_advisor_bot/internal/sqlite"
 )
 
 type Processor struct {
 	tg      *tgClient.Client
 	offset  int
-	storage storage.Storage
+	storage Storage
 }
 
 type Meta struct {
@@ -19,7 +20,14 @@ type Meta struct {
 	UserName string
 }
 
-func NewProcessor(client *tgClient.Client, storage storage.Storage) *Processor {
+type Storage interface {
+	Save(ctx context.Context, page *sqlite.Page) (err error)
+	PickRandom(ctx context.Context, userName string) (page *sqlite.Page, err error)
+	Remove(ctx context.Context, page *sqlite.Page) error
+	IsExist(ctx context.Context, page *sqlite.Page) (bool, error)
+}
+
+func NewProcessor(client *tgClient.Client, storage Storage) *Processor {
 	return &Processor{
 		tg:      client,
 		offset:  0,
