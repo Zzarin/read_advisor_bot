@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"log"
 	"net/url"
-	"read_advisor_bot/internal/storage"
+	"read_advisor_bot/internal/sqlite"
 	"strings"
 )
 
@@ -37,7 +37,7 @@ func (p *Processor) doCmd(text string, chatID int, userName string) error {
 }
 
 func (p Processor) savePage(chatID int, pageURL string, userName string) (err error) {
-	page := &storage.Page{
+	page := &sqlite.Page{
 		URL:      pageURL,
 		UserName: userName,
 	}
@@ -63,10 +63,10 @@ func (p Processor) savePage(chatID int, pageURL string, userName string) (err er
 
 func (p *Processor) sendRandom(chatID int, userName string) (err error) {
 	page, err := p.storage.PickRandom(context.TODO(), userName)
-	if err != nil && !errors.Is(err, storage.ErrNoSavedPages) {
+	if err != nil && !errors.Is(err, sqlite.ErrNoSavedPages) {
 		return fmt.Errorf("can't pick a random page %w", err)
 	}
-	if errors.Is(err, storage.ErrNoSavedPages) {
+	if errors.Is(err, sqlite.ErrNoSavedPages) {
 		return p.tg.SendMessage(chatID, msgNoSavedPages)
 	}
 
