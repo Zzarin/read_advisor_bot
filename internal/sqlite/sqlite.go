@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	_ "github.com/mattn/go-sqlite3"
 	"read_advisor_bot/internal/storage"
 )
 
@@ -11,7 +12,7 @@ type Storage struct {
 	db *sql.DB
 }
 
-func (s *Storage) init(ctx context.Context) error {
+func (s *Storage) Init(ctx context.Context) error {
 	query := `CREATE TABLE IF NOT EXISTS pages (url TEXT, user_name TEXT)`
 	_, err := s.db.ExecContext(ctx, query)
 	if err != nil {
@@ -21,7 +22,7 @@ func (s *Storage) init(ctx context.Context) error {
 }
 
 //NewDb creates new SQLite storage.
-func NewDb(path string) (*Storage, error) { //path is a path where Db is gonna be stored
+func NewDb(path string) (*Storage, error) { //path is a path where Db is going to be stored
 	db, err := sql.Open("sqlite3", path)
 	if err != nil {
 		return nil, fmt.Errorf("can't open database %w", err)
@@ -50,7 +51,7 @@ func (s *Storage) PickRandom(ctx context.Context, userName string) (page *storag
 	var url string
 	err = s.db.QueryRowContext(ctx, query, userName).Scan(&url)
 	if err == sql.ErrNoRows {
-		return nil, nil
+		return nil, storage.ErrNoSavedPages
 	}
 	if err != nil {
 		return nil, fmt.Errorf("can't get a page %w", err)
