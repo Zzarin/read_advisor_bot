@@ -2,7 +2,7 @@ package main
 
 import (
 	"context"
-	"flag"
+	"github.com/jessevdk/go-flags"
 	"log"
 	"read_advisor_bot/internal/api/client/telegram"
 	"read_advisor_bot/internal/consumer"
@@ -10,15 +10,16 @@ import (
 	"read_advisor_bot/internal/sqlite"
 )
 
-const (
-	tgBotHost         = "api.telegram.org"
-	sqliteStoragePath = ".data/sqlite/storage.db"
-	batchSize         = 100
-)
-
 func main() {
-	tgClient := telegram.New(tgBotHost, mustToken())
-	storage, err := sqlite.NewDb(sqliteStoragePath)
+	var cfg Config
+	parser := flags.NewParser(&cfg, flags.Default)
+	_, err := parser.Parse()
+	if err != nil {
+		log.Fatal("Error parse env variables", err)
+	}
+
+	tgClient := telegram.New(cfg.TgBotHost, cfg.TgBotToken)
+	storage, err := sqlite.NewDb(cfg.SqliteStoragePath)
 	if err != nil {
 		log.Fatalf("can't create new Db %v", err)
 	}
@@ -28,25 +29,9 @@ func main() {
 	}
 	eventsProcessor := eventTelegram.NewProcessor(tgClient, storage)
 	log.Print("service started")
-	handler := consumer.NewConsumer(eventsProcessor, eventsProcessor, batchSize)
+	handler := consumer.NewConsumer(eventsProcessor, eventsProcessor, cfg.BatchSize)
 	err = handler.Start()
 	if err != nil {
 		log.Fatal("service is stopped", err)
 	}
-}
-
-func mustToken() string {
-	//bot -tg-bot-token `my token`
-	token := flag.String(
-		"tg-bot-token",
-		"",
-		"token for access telegram bot",
-	)
-	flag.Parse()
-
-	if *token == "" {
-		log.Fatal("token is not passed")
-	}
-
-	return *token
 }
