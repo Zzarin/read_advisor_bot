@@ -36,7 +36,7 @@ func (p *Processor) doCmd(text string, chatID int, userName string) error {
 	}
 }
 
-func (p Processor) savePage(chatID int, pageURL string, userName string) (err error) {
+func (p *Processor) savePage(chatID int, pageURL string, userName string) (err error) {
 	page := &sqlite.Page{
 		URL:      pageURL,
 		UserName: userName,

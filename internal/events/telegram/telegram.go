@@ -41,7 +41,7 @@ func (p *Processor) Fetch(limit int) ([]events.Event, error) {
 		return nil, fmt.Errorf("can't get event %w", err)
 	}
 
-	if len(updates) == 0 { //если список апдейтов пуст то выходим
+	if len(updates) == 0 { //если список апдейтов пуст выходим
 		return nil, nil
 	}
 
@@ -51,7 +51,7 @@ func (p *Processor) Fetch(limit int) ([]events.Event, error) {
 		resp = append(resp, event(u))
 	}
 
-	p.offset = updates[len(updates)-1].ID + 1 //обновляем оффсет чтобы получать свежие апдейты
+	p.offset = updates[len(updates)-1].ID + 1 //обновляем оффсет. чтобы получать свежие апдейты
 	//апдейты относятся только к телеге и в других мессанджерах их возможно не будет
 	//эвент это структура нашего приложения к которой мы преобразуем сообщения от разных
 	//мессенджеров в каком бы формате они не приходили

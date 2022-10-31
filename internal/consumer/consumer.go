@@ -46,7 +46,8 @@ func (c *Consumer) Start() error {
 /*potential problems:
 1. Event lost: try retry
 2. Handling of all events: stop
-after first error, error counter 3. Concurrent processing - homework. Need wait
+after first error, error counter
+3. Concurrent processing - homework. Need wait
 group (sync package)
 */
 func (c *Consumer) handleEvents(events []events.Event) error {
