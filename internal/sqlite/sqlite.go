@@ -2,12 +2,10 @@ package sqlite
 
 import (
 	"context"
-	"crypto/sha1"
 	"database/sql"
 	"errors"
 	"fmt"
 	_ "github.com/mattn/go-sqlite3"
-	"io"
 )
 
 type Storage struct {
@@ -19,21 +17,6 @@ var ErrNoSavedPages = errors.New("no saved pages")
 type Page struct {
 	URL      string
 	UserName string
-}
-
-func (p *Page) Hash() (string, error) {
-	h := sha1.New()
-	_, err := io.WriteString(h, p.URL)
-	if err != nil {
-		return "", fmt.Errorf("can't calculate hash %w", err)
-	}
-
-	_, err = io.WriteString(h, p.UserName)
-	if err != nil {
-		return "", fmt.Errorf("can't calculate hash %w", err)
-	}
-
-	return fmt.Sprintf("%x", h.Sum(nil)), nil
 }
 
 func (s *Storage) Init(ctx context.Context) error {
