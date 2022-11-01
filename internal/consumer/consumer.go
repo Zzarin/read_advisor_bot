@@ -3,6 +3,7 @@ package consumer
 import (
 	"log"
 	"read_advisor_bot/internal/events"
+	"sync"
 	"time"
 )
 
@@ -43,22 +44,21 @@ func (c *Consumer) Start() error {
 	}
 }
 
-/*potential problems:
-1. Event lost: try retry
-2. Handling of all events: stop
-after first error, error counter
-3. Concurrent processing - homework. Need wait
-group (sync package)
-*/
 func (c *Consumer) handleEvents(events []events.Event) error {
+	var wg sync.WaitGroup
 	for _, event := range events {
-		log.Printf("got new event: %s", event.Text)
+		wg.Add(1)
+		event := event
+		go func() {
+			defer wg.Done()
+			log.Printf("got new event: %s", event.Text)
 
-		err := c.processor.Process(event)
-		if err != nil {
-			log.Printf("got new event: %s", err.Error())
-			continue
-		}
+			err := c.processor.Process(event)
+			if err != nil {
+				log.Printf("got new event: %s", err.Error())
+			}
+		}()
 	}
+	wg.Wait()
 	return nil
 }
